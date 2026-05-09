@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Payment - The Ghost Store</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><span class="logo-ghost">👻</span> The Ghost Store</div>
+  </header>
+
+  <main class="container">
+    <h3>Payment</h3>
+    <div class="card">
+      <p class="small">Click the button below to pay with Paystack.</p>
+      <button id="payBtn" class="btn">Pay with Paystack</button>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script>
+    const paystackPublicKey = process.env.PAYSTACK_PUBLIC_KEY; 
+
+    function payWithPaystack() {
+      const cart = JSON.parse(localStorage.getItem('ghostStoreCart') || '[]');
+      if (!cart.length) return alert('Your cart is empty. Add items before checkout.');
+
+      const totals = GS.calculateTotals();
+      const amount = totals.total;
+      if (amount <= 0) return alert('Invalid cart total.');
+
+      const email = prompt('Enter your email for the receipt:', 'customer@example.com');
+      if (!email) return alert('Email is required to pay.');
+
+      const handler = PaystackPop.setup({
+        key: paystackPublicKey,
+        email,
+        amount: amount * 100,
+        currency: 'ZAR',
+        ref: 'GS-' + Date.now(),
+        callback(response) {
+          window.location.href = `payment-success.html?reference=${response.reference}`;
+        },
+        onClose() {
+          alert('Payment was cancelled.');
+        }
+      });
+
+      handler.openIframe();
+    }
+
+    document.getElementById('payBtn').addEventListener('click', payWithPaystack);
+  </script>
+</body>
+</html>
