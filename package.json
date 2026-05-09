@@ -1,0 +1,14 @@
+{
+  "name": "ghost-store",
+  "version": "1.0.0",
+  "description": "Ghost Store e-commerce site",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build step required'",
+    "start": "npx serve ."
+  },
+  "keywords": ["ecommerce", "shoes", "store"],
+  "author": "Ghost Store",
+  "license": "ISC"
+}
