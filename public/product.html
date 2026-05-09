@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Product - The Ghost Store</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="product-page">
+  <header class="header">
+    <div class="brand"><span class="logo-ghost">👻</span> The Ghost Store</div>
+    <nav class="nav">
+      <a class="btn ghost" href="index.html">Home</a>
+      <a class="btn ghost" href="category.html">Categories</a>
+      <a class="btn ghost" href="login.html">Login</a>
+      <a class="btn" href="cart.html">Cart</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="productDetail"></div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const product = GS.getProduct(params.get('id'));
+    const target = document.getElementById('productDetail');
+
+    if (!product) {
+      target.innerHTML = '<p>Product not found. Please go back to <a href="index.html">home</a> or <a href="category.html">categories</a>.</p>';
+    } else {
+      const mainImage = (product.images && product.images.length) ? product.images[0] : product.image;
+      const thumbs = (product.images || [product.image]).map((img, idx) => `
+          <img src="${img}" class="shoe-thumb${idx === 0 ? ' active' : ''}" data-img="${img}" alt="${product.name} angle ${idx + 1}" />
+        `).join('');
+
+      target.innerHTML = `
+        <div class="card">
+          <div class="shoe-image-wrapper"><img src="${mainImage}" class="shoe-image" alt="${product.name}" /></div>
+          <div class="shoe-thumb-row">${thumbs}</div>
+          <h2 class="product-title">${product.name}</h2>
+          <div class="price">R${product.price}</div>
+          <p class="small">Category: ${product.category}</p>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button id="addProduct" class="btn add">Add to cart</button>
+            <a class="btn ghost" href="category.html?cat=${product.category}">More ${product.category}</a>
+          </div>
+        </div>
+      `;
+
+      const card = target.querySelector('.card');
+      card.querySelectorAll('.shoe-thumb').forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          const main = card.querySelector('.shoe-image');
+          main.src = thumb.dataset.img;
+          card.querySelectorAll('.shoe-thumb').forEach(t => t.classList.toggle('active', t === thumb));
+        });
+      });
+
+      document.getElementById('addProduct').addEventListener('click', () => {
+        GS.addToCart(product.id, 1);
+        alert('Added to cart');
+      });
+    }
+  </script>
+</body>
+</html>
