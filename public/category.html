@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Categories - The Ghost Store</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><span class="logo-ghost">👻</span> The Ghost Store</div>
+    <nav class="nav">
+      <a class="btn ghost" href="index.html">Home</a>
+      <a class="btn ghost" href="login.html">Login</a>
+      <a class="btn" href="cart.html">Cart</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="category-buttons">
+      <button onclick="filterCategory('sneakers')">Sneakers</button>
+      <button onclick="filterCategory('casual')">Casual</button>
+      <button onclick="filterCategory('boots')">Boots</button>
+      <button onclick="filterCategory('')">All</button>
+    </div>
+    <h3>Category</h3>
+    <div id="catProducts" class="grid"></div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const el = document.getElementById('catProducts');
+
+    function renderProducts(category = '') {
+      const filtered = category
+        ? GS.PRODUCTS.filter(p => p.category === category)
+        : GS.PRODUCTS;
+      el.innerHTML = '';
+      filtered.forEach(p => {
+        const mainImage = (p.images && p.images.length) ? p.images[0] : p.image;
+        const thumbs = (p.images || [p.image]).map((img, idx) => `
+            <img src="${img}" class="shoe-thumb${idx === 0 ? ' active' : ''}" data-img="${img}" alt="${p.name} angle ${idx + 1}" />
+          `).join('');
+
+        const d = document.createElement('div');
+        d.className = 'card';
+        d.innerHTML = `
+          <div class="shoe-image-wrapper"><img src="${mainImage}" class="shoe-image" alt="${p.name}" /></div>
+          <div class="shoe-thumb-row">${thumbs}</div>
+          <div class="product-title">${p.name}</div>
+          <div class="price">R${p.price}</div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn add" data-id="${p.id}">Add to cart</button>
+            <a class="btn ghost" href="product.html?id=${p.id}">View</a>
+          </div>
+        `;
+        el.appendChild(d);
+
+        d.querySelectorAll('.shoe-thumb').forEach(thumb => {
+          thumb.addEventListener('click', () => {
+            const main = d.querySelector('.shoe-image');
+            main.src = thumb.dataset.img;
+            d.querySelectorAll('.shoe-thumb').forEach(t => t.classList.toggle('active', t === thumb));
+          });
+        });
+      });
+      document.querySelectorAll('.btn.add').forEach(b => {
+        b.addEventListener('click', e => {
+          GS.addToCart(e.currentTarget.dataset.id, 1);
+          alert('Added to cart');
+        });
+      });
+    }
+
+    function filterCategory(cat) {
+      renderProducts(cat);
+    }
+
+    const params = new URLSearchParams(location.search);
+    renderProducts(params.get('cat') || '');
+  </script>
+</body>
+</html>
