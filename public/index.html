@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>The Ghost Store - Home</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><span class="logo-ghost">👻</span> The Ghost Store</div>
+    <nav class="nav">
+      <a class="btn ghost" href="login.html">Login</a>
+      <a class="btn ghost" href="category.html">Categories</a>
+      <a class="btn" href="cart.html">Cart</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card center">
+      <div>
+        <h2 style="margin:0">Featured Shoe</h2>
+        <p class="small">A 360° rotating showcase</p>
+        <div class="rotate-wrap">
+          <!-- 360° viewer for the Air Force – replace the src with
+               your own model or sprite‑sequence -->
+          <model-viewer id="featured"
+                        src="images/Nike Shox TL.jpeg"
+                        alt="Nike Shox TL
+                      "
+                        auto-rotate
+                        camera-controls
+                        style="width:100%;max-width:400px;height:300px;">
+          </model-viewer>
+        </div>
+        <div style="text-align:center;margin-top:12px">
+          <button id="addFeatured" class="btn">Add Featured to Cart</button>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:22px">
+      <h3>Specials</h3>
+      <div class="specials">
+        <div class="special-card">
+          <div class="product-title">Combo Offer</div>
+          <div class="price">Buy 2 pairs for <strong>R<span id="comboPrice"></span></strong></div>
+          <div class="small">Automatically applied at checkout</div>
+        </div>
+        <div class="special-card">
+          <div class="product-title">Limited Discount</div>
+          <div class="small">Get free delivery on orders over R2000 (coming soon)</div>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:22px">
+      <h3>All Shoes</h3>
+      <div id="products" class="grid"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const productsEl = document.getElementById('products');
+    const comboPriceEl = document.getElementById('comboPrice');
+    comboPriceEl.textContent = GS.COMBO_PRICE_FOR_TWO;
+
+    const featured = GS.PRODUCTS[0];
+    document.getElementById('addFeatured').addEventListener('click', () => {
+      GS.addToCart(featured.id, 1);
+      alert('Added featured shoe to cart');
+    });
+
+    function renderProducts() {
+      productsEl.innerHTML = '';
+      GS.PRODUCTS.forEach(p => {
+        const mainImage = (p.images && p.images.length) ? p.images[0] : p.image;
+        const thumbs = (p.images || [p.image]).map((img, idx) => `
+            <img src="${img}" class="shoe-thumb${idx === 0 ? ' active' : ''}" data-img="${img}" alt="${p.name} angle ${idx + 1}" />
+          `).join('');
+
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div class="shoe-image-wrapper"><img src="${mainImage}" class="shoe-image" alt="${p.name}" /></div>
+          <div class="shoe-thumb-row">${thumbs}</div>
+          <div class="product-title">${p.name}</div>
+          <div class="price">R${p.price}</div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn add" data-id="${p.id}">Add to cart</button>
+            <a class="btn ghost" href="product.html?id=${p.id}">View</a>
+          </div>
+        `;
+        productsEl.appendChild(div);
+
+        div.querySelectorAll('.shoe-thumb').forEach(thumb => {
+          thumb.addEventListener('click', () => {
+            const main = div.querySelector('.shoe-image');
+            main.src = thumb.dataset.img;
+            div.querySelectorAll('.shoe-thumb').forEach(t => t.classList.toggle('active', t === thumb));
+          });
+        });
+      });
+      document.querySelectorAll('.btn.add').forEach(b => {
+        b.addEventListener('click', e => {
+          const id = e.currentTarget.dataset.id;
+          GS.addToCart(id, 1);
+          alert('Added to cart');
+        });
+      });
+    }
+    renderProducts();
+  </script>
+
+  <!-- model-viewer library -->
+  <script type="module"
+          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+</html>
