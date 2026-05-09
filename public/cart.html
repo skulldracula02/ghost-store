@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cart - The Ghost Store</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><span class="logo-ghost">👻</span> The Ghost Store</div>
+    <nav class="nav">
+      <a class="btn ghost" href="index.html">Home</a>
+      <a class="btn ghost" href="category.html">Categories</a>
+      <a class="btn" href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h3>Your Cart</h3>
+    <div class="card">
+      <table class="cart-list" id="cartTable">
+        <thead><tr><th>Product</th><th>Price</th><th class="qty">Qty</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody id="cartBody"></tbody>
+      </table>
+
+      <div class="summary" style="margin-top:12px">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between"><div>Subtotal</div><div id="subtotal">R0</div></div>
+          <div style="display:flex;justify-content:space-between"><div>Delivery</div><div id="delivery">R0</div></div>
+          <hr>
+          <div style="display:flex;justify-content:space-between;font-weight:700"><div>Total</div><div id="total">R0</div></div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <a id="checkoutBtn" class="btn" href="payment.html">Proceed to Payment</a>
+            <button id="clearBtn" class="btn ghost">Clear Cart</button>
+          </div>
+          <p class="footer-note">Combo: Buy 2 pairs for R<span id="comboPriceCart"></span>. Delivery R150.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const cartBody = document.getElementById('cartBody');
+    const subtotalEl = document.getElementById('subtotal');
+    const deliveryEl = document.getElementById('delivery');
+    const totalEl = document.getElementById('total');
+    document.getElementById('comboPriceCart').textContent = GS.COMBO_PRICE_FOR_TWO;
+
+    function renderCart(){
+      const cart = GS.getCart();
+      cartBody.innerHTML = '';
+      cart.forEach(ci=>{
+        const p = GS.getProduct(ci.id);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.name}</td>
+          <td>R${p.price}</td>
+          <td class="qty"><input type="number" min="0" value="${ci.qty}" data-id="${ci.id}" class="qtyInput" style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd"></td>
+          <td>R${p.price * ci.qty}</td>
+          <td><button class="btn ghost remove" data-id="${ci.id}">Remove</button></td>
+        `;
+        cartBody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.qtyInput').forEach(inp=>{
+        inp.addEventListener('change', e=>{
+          const id = e.currentTarget.dataset.id;
+          const qty = parseInt(e.currentTarget.value) || 0;
+          GS.updateQty(id, qty);
+          renderCart();
+        });
+      });
+      document.querySelectorAll('.remove').forEach(b=>{
+        b.addEventListener('click', e=>{
+          const id = e.currentTarget.dataset.id;
+          GS.updateQty(id, 0);
+          renderCart();
+        });
+      });
+
+      const totals = GS.calculateTotals();
+      subtotalEl.textContent = 'R' + totals.subtotal;
+      deliveryEl.textContent = 'R' + totals.delivery;
+      totalEl.textContent = 'R' + totals.total;
+    }
+
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      if(confirm('Clear cart?')){ GS.clearCart(); renderCart(); }
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>
